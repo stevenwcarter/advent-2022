@@ -10,7 +10,7 @@ fn main() {
     println!("Total carried by top three is: {}", b_result);
 }
 
-fn a(path: &str) -> u32 {
+fn build_elves_vec(path: &str) -> Vec<Vec<u32>> {
     let lines = read_lines(path).unwrap();
 
     let mut elves: Vec<Vec<u32>> = Vec::new();
@@ -27,6 +27,12 @@ fn a(path: &str) -> u32 {
     }
     // push last elf since no blank line after
     elves.push(elf);
+
+    elves
+}
+
+fn a(path: &str) -> u32 {
+    let elves = build_elves_vec(path);
 
     let mut max = 0;
     for elf in elves {
@@ -40,22 +46,7 @@ fn a(path: &str) -> u32 {
 }
 
 fn b(path: &str) -> u32 {
-    let lines = read_lines(path).unwrap();
-
-    let mut elves: Vec<Vec<u32>> = Vec::new();
-
-    let mut elf: Vec<u32> = Vec::new();
-    for line in lines {
-        if line.trim().eq("") {
-            elves.push(elf.clone());
-            elf = Vec::new();
-        } else {
-            let calories: u32 = line.parse().unwrap();
-            elf.push(calories);
-        }
-    }
-    // push last elf since no blank line after
-    elves.push(elf);
+    let elves = build_elves_vec(path);
 
     let mut elves_totaled: Vec<u32> = Vec::new();
     for elf in elves {
