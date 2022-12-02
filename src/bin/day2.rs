@@ -43,7 +43,7 @@ impl RPSInput {
 enum RPSOutput {
     ROCK,
     PAPER,
-    SCISSORS
+    SCISSORS,
 }
 
 impl RPSOutput {
@@ -64,45 +64,21 @@ struct Strategy {
 impl Strategy {
     pub fn score(&self) -> u32 {
         match self.input {
-            RPSInput::ROCK => {
-                match self.output {
-                    RPSOutput::ROCK => {
-                    self.output.score() + 3
-                },
-                        RPSOutput::PAPER => {
-                    self.output.score() + 6
-                    },
-                        RPSOutput::SCISSORS => {
-                    self.output.score() + 0
-                    }
-                }
-            }
-            RPSInput::PAPER => {
-                match self.output {
-                    RPSOutput::ROCK => {
-                    self.output.score() + 0
-                },
-                        RPSOutput::PAPER => {
-                    self.output.score() + 3
-                    },
-                        RPSOutput::SCISSORS => {
-                    self.output.score() + 6
-                    }
-                }
-            }
-            RPSInput::SCISSORS => {
-                match self.output {
-                    RPSOutput::ROCK => {
-                    self.output.score() + 6
-                },
-                        RPSOutput::PAPER => {
-                    self.output.score() + 0
-                    },
-                        RPSOutput::SCISSORS => {
-                    self.output.score() + 3
-                    }
-                }
-            }
+            RPSInput::ROCK => match self.output {
+                RPSOutput::ROCK => self.output.score() + 3,
+                RPSOutput::PAPER => self.output.score() + 6,
+                RPSOutput::SCISSORS => self.output.score() + 0,
+            },
+            RPSInput::PAPER => match self.output {
+                RPSOutput::ROCK => self.output.score() + 0,
+                RPSOutput::PAPER => self.output.score() + 3,
+                RPSOutput::SCISSORS => self.output.score() + 6,
+            },
+            RPSInput::SCISSORS => match self.output {
+                RPSOutput::ROCK => self.output.score() + 6,
+                RPSOutput::PAPER => self.output.score() + 0,
+                RPSOutput::SCISSORS => self.output.score() + 3,
+            },
         }
     }
 }
@@ -118,19 +94,16 @@ fn a(path: &str) -> u32 {
             "A" => RPSInput::ROCK,
             "B" => RPSInput::PAPER,
             "C" => RPSInput::SCISSORS,
-            _ => panic!("Unknown input")
+            _ => panic!("Unknown input"),
         };
         let output: RPSOutput = match splits[1] {
             "X" => RPSOutput::ROCK,
             "Y" => RPSOutput::PAPER,
             "Z" => RPSOutput::SCISSORS,
-            _ => panic!("Uknown output")
+            _ => panic!("Uknown output"),
         };
 
-        let strategy = Strategy {
-            input,
-            output,
-        };
+        let strategy = Strategy { input, output };
 
         rounds.push(strategy);
     }
@@ -149,26 +122,22 @@ fn b(path: &str) -> u32 {
             "A" => RPSInput::ROCK,
             "B" => RPSInput::PAPER,
             "C" => RPSInput::SCISSORS,
-            _ => panic!("Unknown input")
+            _ => panic!("Unknown input"),
         };
         let output: RPSOutput = match splits[1] {
             "X" => input.lose_response(),
             "Y" => input.draw_response(),
             "Z" => input.win_response(),
-            _ => panic!("Uknown output")
+            _ => panic!("Uknown output"),
         };
 
-        let strategy = Strategy {
-            input,
-            output,
-        };
+        let strategy = Strategy { input, output };
 
         rounds.push(strategy);
     }
 
     rounds.iter().map(|s| s.score()).sum()
 }
-
 
 #[cfg(test)]
 mod tests {
