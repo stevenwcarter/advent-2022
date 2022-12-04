@@ -1,5 +1,7 @@
 use advent::read_lines;
 
+use rayon::prelude::*;
+
 fn main() {
     let puzzle_data = "puzzles/2a.txt";
 
@@ -86,57 +88,55 @@ impl Strategy {
 fn a(path: &str) -> u32 {
     let lines = read_lines(path).unwrap();
 
-    let mut rounds: Vec<Strategy> = Vec::new();
-    for line in lines {
-        let splits = line.trim().split(' ');
-        let splits: Vec<&str> = splits.into_iter().collect();
-        let input: RPSInput = match splits[0] {
-            "A" => RPSInput::Rock,
-            "B" => RPSInput::Paper,
-            "C" => RPSInput::Scissors,
-            _ => panic!("Unknown input"),
-        };
-        let output: RPSOutput = match splits[1] {
-            "X" => RPSOutput::Rock,
-            "Y" => RPSOutput::Paper,
-            "Z" => RPSOutput::Scissors,
-            _ => panic!("Uknown output"),
-        };
+    lines
+        .par_iter()
+        .map(|line| {
+            let splits = line.trim().split(' ');
+            let splits: Vec<&str> = splits.into_iter().collect();
+            let input: RPSInput = match splits[0] {
+                "A" => RPSInput::Rock,
+                "B" => RPSInput::Paper,
+                "C" => RPSInput::Scissors,
+                _ => panic!("Unknown input"),
+            };
+            let output: RPSOutput = match splits[1] {
+                "X" => RPSOutput::Rock,
+                "Y" => RPSOutput::Paper,
+                "Z" => RPSOutput::Scissors,
+                _ => panic!("Uknown output"),
+            };
 
-        let strategy = Strategy { input, output };
-
-        rounds.push(strategy);
-    }
-
-    rounds.iter().map(|s| s.score()).sum()
+            Strategy { input, output }
+        })
+        .map(|s| s.score())
+        .sum()
 }
 
 fn b(path: &str) -> u32 {
     let lines = read_lines(path).unwrap();
 
-    let mut rounds: Vec<Strategy> = Vec::new();
-    for line in lines {
-        let splits = line.trim().split(' ');
-        let splits: Vec<&str> = splits.into_iter().collect();
-        let input: RPSInput = match splits[0] {
-            "A" => RPSInput::Rock,
-            "B" => RPSInput::Paper,
-            "C" => RPSInput::Scissors,
-            _ => panic!("Unknown input"),
-        };
-        let output: RPSOutput = match splits[1] {
-            "X" => input.lose_response(),
-            "Y" => input.draw_response(),
-            "Z" => input.win_response(),
-            _ => panic!("Uknown output"),
-        };
+    lines
+        .par_iter()
+        .map(|line| {
+            let splits = line.trim().split(' ');
+            let splits: Vec<&str> = splits.into_iter().collect();
+            let input: RPSInput = match splits[0] {
+                "A" => RPSInput::Rock,
+                "B" => RPSInput::Paper,
+                "C" => RPSInput::Scissors,
+                _ => panic!("Unknown input"),
+            };
+            let output: RPSOutput = match splits[1] {
+                "X" => input.lose_response(),
+                "Y" => input.draw_response(),
+                "Z" => input.win_response(),
+                _ => panic!("Uknown output"),
+            };
 
-        let strategy = Strategy { input, output };
-
-        rounds.push(strategy);
-    }
-
-    rounds.iter().map(|s| s.score()).sum()
+            Strategy { input, output }
+        })
+        .map(|s| s.score())
+        .sum()
 }
 
 #[cfg(test)]
