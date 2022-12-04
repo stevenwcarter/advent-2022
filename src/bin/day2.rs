@@ -3,55 +3,55 @@ use advent::read_lines;
 fn main() {
     let puzzle_data = "puzzles/2a.txt";
 
-    let answer_a = a(&puzzle_data);
+    let answer_a = a(puzzle_data);
     println!("Total score: {}", answer_a);
 
-    let b_result = b(&puzzle_data);
+    let b_result = b(puzzle_data);
     println!("Total carried by top three is: {}", b_result);
 }
 
 enum RPSInput {
-    ROCK,
-    PAPER,
-    SCISSORS,
+    Rock,
+    Paper,
+    Scissors,
 }
 
 impl RPSInput {
     pub fn lose_response(&self) -> RPSOutput {
         match self {
-            RPSInput::ROCK => RPSOutput::SCISSORS,
-            RPSInput::SCISSORS => RPSOutput::PAPER,
-            RPSInput::PAPER => RPSOutput::ROCK,
+            RPSInput::Rock => RPSOutput::Scissors,
+            RPSInput::Scissors => RPSOutput::Paper,
+            RPSInput::Paper => RPSOutput::Rock,
         }
     }
     pub fn draw_response(&self) -> RPSOutput {
         match self {
-            RPSInput::ROCK => RPSOutput::ROCK,
-            RPSInput::SCISSORS => RPSOutput::SCISSORS,
-            RPSInput::PAPER => RPSOutput::PAPER,
+            RPSInput::Rock => RPSOutput::Rock,
+            RPSInput::Scissors => RPSOutput::Scissors,
+            RPSInput::Paper => RPSOutput::Paper,
         }
     }
     pub fn win_response(&self) -> RPSOutput {
         match self {
-            RPSInput::ROCK => RPSOutput::PAPER,
-            RPSInput::SCISSORS => RPSOutput::ROCK,
-            RPSInput::PAPER => RPSOutput::SCISSORS,
+            RPSInput::Rock => RPSOutput::Paper,
+            RPSInput::Scissors => RPSOutput::Rock,
+            RPSInput::Paper => RPSOutput::Scissors,
         }
     }
 }
 
 enum RPSOutput {
-    ROCK,
-    PAPER,
-    SCISSORS,
+    Rock,
+    Paper,
+    Scissors,
 }
 
 impl RPSOutput {
     pub fn score(&self) -> u32 {
         match self {
-            RPSOutput::ROCK => 1,
-            RPSOutput::PAPER => 2,
-            RPSOutput::SCISSORS => 3,
+            RPSOutput::Rock => 1,
+            RPSOutput::Paper => 2,
+            RPSOutput::Scissors => 3,
         }
     }
 }
@@ -64,20 +64,20 @@ struct Strategy {
 impl Strategy {
     pub fn score(&self) -> u32 {
         match self.input {
-            RPSInput::ROCK => match self.output {
-                RPSOutput::ROCK => self.output.score() + 3,
-                RPSOutput::PAPER => self.output.score() + 6,
-                RPSOutput::SCISSORS => self.output.score() + 0,
+            RPSInput::Rock => match self.output {
+                RPSOutput::Rock => self.output.score() + 3,
+                RPSOutput::Paper => self.output.score() + 6,
+                RPSOutput::Scissors => self.output.score(),
             },
-            RPSInput::PAPER => match self.output {
-                RPSOutput::ROCK => self.output.score() + 0,
-                RPSOutput::PAPER => self.output.score() + 3,
-                RPSOutput::SCISSORS => self.output.score() + 6,
+            RPSInput::Paper => match self.output {
+                RPSOutput::Rock => self.output.score(),
+                RPSOutput::Paper => self.output.score() + 3,
+                RPSOutput::Scissors => self.output.score() + 6,
             },
-            RPSInput::SCISSORS => match self.output {
-                RPSOutput::ROCK => self.output.score() + 6,
-                RPSOutput::PAPER => self.output.score() + 0,
-                RPSOutput::SCISSORS => self.output.score() + 3,
+            RPSInput::Scissors => match self.output {
+                RPSOutput::Rock => self.output.score() + 6,
+                RPSOutput::Paper => self.output.score(),
+                RPSOutput::Scissors => self.output.score() + 3,
             },
         }
     }
@@ -88,18 +88,18 @@ fn a(path: &str) -> u32 {
 
     let mut rounds: Vec<Strategy> = Vec::new();
     for line in lines {
-        let splits = line.trim().split(" ");
+        let splits = line.trim().split(' ');
         let splits: Vec<&str> = splits.into_iter().collect();
         let input: RPSInput = match splits[0] {
-            "A" => RPSInput::ROCK,
-            "B" => RPSInput::PAPER,
-            "C" => RPSInput::SCISSORS,
+            "A" => RPSInput::Rock,
+            "B" => RPSInput::Paper,
+            "C" => RPSInput::Scissors,
             _ => panic!("Unknown input"),
         };
         let output: RPSOutput = match splits[1] {
-            "X" => RPSOutput::ROCK,
-            "Y" => RPSOutput::PAPER,
-            "Z" => RPSOutput::SCISSORS,
+            "X" => RPSOutput::Rock,
+            "Y" => RPSOutput::Paper,
+            "Z" => RPSOutput::Scissors,
             _ => panic!("Uknown output"),
         };
 
@@ -116,12 +116,12 @@ fn b(path: &str) -> u32 {
 
     let mut rounds: Vec<Strategy> = Vec::new();
     for line in lines {
-        let splits = line.trim().split(" ");
+        let splits = line.trim().split(' ');
         let splits: Vec<&str> = splits.into_iter().collect();
         let input: RPSInput = match splits[0] {
-            "A" => RPSInput::ROCK,
-            "B" => RPSInput::PAPER,
-            "C" => RPSInput::SCISSORS,
+            "A" => RPSInput::Rock,
+            "B" => RPSInput::Paper,
+            "C" => RPSInput::Scissors,
             _ => panic!("Unknown input"),
         };
         let output: RPSOutput = match splits[1] {
@@ -146,14 +146,14 @@ mod tests {
     #[test]
     fn test_a() {
         let test_path = "test-resources/day2.txt";
-        let result = a(&test_path);
+        let result = a(test_path);
         assert_eq!(result, 15);
     }
 
     #[test]
     fn test_b() {
         let test_path = "test-resources/day2.txt";
-        let result = b(&test_path);
+        let result = b(test_path);
         assert_eq!(result, 12);
     }
 }
