@@ -3,10 +3,10 @@ use advent::read_lines;
 fn main() {
     let puzzle_data = "puzzles/1a.txt";
 
-    let max = a(&puzzle_data);
+    let max = a(puzzle_data);
     println!("Max calories carried is: {}", max);
 
-    let b_result = b(&puzzle_data);
+    let b_result = b(puzzle_data);
     println!("Total carried by top three is: {}", b_result);
 }
 
@@ -67,14 +67,14 @@ mod tests {
     #[test]
     fn test_a() {
         let test_path = "test-resources/day1.txt";
-        let result = a(&test_path);
+        let result = a(test_path);
         assert_eq!(result, 24000);
     }
 
     #[test]
     fn test_b() {
         let test_path = "test-resources/day1.txt";
-        let result = b(&test_path);
+        let result = b(test_path);
         assert_eq!(result, 45000);
     }
 }
