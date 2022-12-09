@@ -55,8 +55,8 @@ fn distance_too_great_and_adjust(i: usize, x: &mut [i32], y: &mut [i32]) {
 
 fn a(path: &str) -> (usize, usize) {
     // starting positions
-    let mut tx_vec: Vec<i32> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    let mut ty_vec: Vec<i32> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let mut tx_vec: Vec<i32> = vec![0; 10];
+    let mut ty_vec: Vec<i32> = vec![0; 10];
 
     // keep track of where two of the knots "visit"
     let mut visited_a: HashSet<(i32, i32)> = HashSet::new();
