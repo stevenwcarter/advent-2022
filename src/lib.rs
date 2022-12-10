@@ -1,3 +1,4 @@
+use std::fs::read_to_string;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -14,6 +15,14 @@ where
     let lines: Vec<String> = reader.into_iter().map(|l| l.unwrap()).collect();
 
     Ok(lines)
+}
+pub fn read<P>(filename: P) -> String
+where
+    P: AsRef<Path>,
+{
+    let result = read_to_string(filename).unwrap().parse();
+
+    result.unwrap()
 }
 
 #[cfg(test)]
