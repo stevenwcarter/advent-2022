@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+pub mod day11;
 pub mod radio_stream;
 
 pub fn read_lines<P>(filename: P) -> io::Result<Vec<String>>
