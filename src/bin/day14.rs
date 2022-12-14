@@ -1,9 +1,8 @@
-use itertools::Itertools;
 use std::collections::HashSet;
 
 use advent::read;
 
-#[derive(PartialEq, Debug, Eq, Hash)]
+#[derive(PartialEq, Debug, Eq, Hash, Clone)]
 struct Point {
     pub x: i32,
     pub y: i32,
@@ -12,11 +11,52 @@ struct Point {
 fn main() {
     let puzzle_data = "puzzles/14.txt";
 
-    let answer_a = a(puzzle_data);
-    println!("A Score: {}", answer_a);
+    // let answer_a = a(puzzle_data);
+    // println!("A Score: {}", answer_a);
 
     let b_result = b(puzzle_data);
     println!("B Score: {}", b_result);
+}
+
+struct PointSet {
+    pointset: HashSet<Point>,
+}
+
+impl PointSet {
+    pub fn new(points: Vec<Point>) -> PointSet {
+        PointSet {
+            pointset: HashSet::from_iter(points.iter().cloned()),
+        }
+    }
+    pub fn insert(&mut self, point: Point) {
+        self.pointset.insert(point);
+    }
+
+    pub fn contains(&self, point: &Point) -> bool {
+        self.pointset.contains(point)
+    }
+
+    pub fn get_points_for_x(&self, x: i32) -> Vec<&Point> {
+        self.pointset.iter().filter(|p| p.x == x).collect()
+    }
+
+    #[cfg(test)]
+    pub fn len(&self) -> usize {
+        self.pointset.len()
+    }
+
+    pub fn max_y(&self) -> i32 {
+        self.pointset.iter().map(|p| p.y).max().unwrap()
+    }
+    pub fn max_x(&self) -> i32 {
+        self.pointset.iter().map(|p| p.x).max().unwrap()
+    }
+    pub fn min_x(&self) -> i32 {
+        self.pointset.iter().map(|p| p.x).min().unwrap()
+    }
+    // pub fn min_y(&self) -> i32 {
+    //     self.pointset.iter().map(|p| p.y).min().unwrap()
+    // }
 }
 
 fn build_points(p1x: i32, p1y: i32, p2x: i32, p2y: i32) -> Vec<Point> {
@@ -42,10 +82,11 @@ fn build_points(p1x: i32, p1y: i32, p2x: i32, p2y: i32) -> Vec<Point> {
     points
 }
 
-fn find_first_opening_downward(points: &HashSet<Point>, x: i32, y: i32) -> (i32, i32) {
+fn find_first_opening_downward(points: &PointSet, x: i32, y: i32) -> (i32, i32) {
     let max_y = points
+        .get_points_for_x(x)
         .iter()
-        .filter(|p| p.x == x && p.y > y)
+        .filter(|p| p.y > y)
         .map(|p| p.y)
         .min();
 
@@ -56,7 +97,7 @@ fn find_first_opening_downward(points: &HashSet<Point>, x: i32, y: i32) -> (i32,
     }
 }
 
-fn model_sand(points: &mut HashSet<Point>, x: i32, y: i32) -> bool {
+fn model_sand(points: &mut PointSet, x: i32, y: i32) -> bool {
     let (newx, newy) = find_first_opening_downward(points, x, y);
     // println!("First opening downward: {},{}", newx, newy);
     if newx == -1 {
@@ -87,7 +128,7 @@ fn model_sand(points: &mut HashSet<Point>, x: i32, y: i32) -> bool {
         true
     }
 }
-fn model_sand_b(points: &mut HashSet<Point>, x: i32, y: i32) -> bool {
+fn model_sand_b(points: &mut PointSet, x: i32, y: i32) -> bool {
     let (newx, newy) = find_first_opening_downward(points, x, y);
     // println!("First opening downward: {},{}", newx, newy);
     if newx == -1 {
@@ -119,7 +160,7 @@ fn model_sand_b(points: &mut HashSet<Point>, x: i32, y: i32) -> bool {
     }
 }
 
-fn build_pointset(path: &str) -> HashSet<Point> {
+fn build_pointset(path: &str) -> PointSet {
     let points: Vec<Point> = read(path)
         .lines()
         .flat_map(|l| {
@@ -154,11 +195,7 @@ fn build_pointset(path: &str) -> HashSet<Point> {
         })
         .collect();
 
-    let mut pointset: HashSet<Point> = HashSet::new();
-    points.iter().for_each(|f| {
-        pointset.insert(Point { x: f.x, y: f.y });
-    });
-    pointset
+    PointSet::new(points)
 }
 
 fn a(path: &str) -> i32 {
@@ -174,10 +211,10 @@ fn a(path: &str) -> i32 {
     sand_counter
 }
 
-fn add_floor(points: &mut HashSet<Point>) {
-    let maxy = points.iter().map(|p| p.y).max().unwrap();
-    let minx = points.iter().map(|p| p.x).min().unwrap();
-    let maxx = points.iter().map(|p| p.x).max().unwrap();
+fn add_floor(points: &mut PointSet) {
+    let maxy = points.max_y();
+    let minx = points.min_x();
+    let maxx = points.max_x();
     let delta = maxx - minx;
 
     let y = maxy + 2;
@@ -194,7 +231,8 @@ fn b(path: &str) -> i32 {
 
     let mut placed = true;
     let mut sand_counter = -1;
-    while placed && !pointset.contains(&Point { x: 500, y: 0 }) && sand_counter < 50000 {
+    let end_point = Point { x: 500, y: 0 };
+    while placed && !pointset.contains(&end_point) && sand_counter < 50000 {
         sand_counter += 1;
         placed = model_sand_b(&mut pointset, 500, 0);
     }
@@ -225,11 +263,11 @@ mod tests {
         let result = b(test_path);
         assert_eq!(result, 93);
     }
-    // 17690
+
     #[test]
-    fn test_b() {
-        let test_path = "test-resources/day14.txt";
+    fn test_b_actual() {
+        let test_path = "puzzles/14.txt";
         let result = b(test_path);
-        assert_eq!(result, 93);
+        assert_eq!(result, 25771);
     }
 }
