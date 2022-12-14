@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
+#![allow(dead_code)]
 use advent::read;
+use std::collections::HashMap;
 
 #[derive(PartialEq, Debug, Eq, Hash, Clone)]
 struct Point {
@@ -11,8 +11,8 @@ struct Point {
 fn main() {
     let puzzle_data = "puzzles/14.txt";
 
-    // let answer_a = a(puzzle_data);
-    // println!("A Score: {}", answer_a);
+    let answer_a = a(puzzle_data);
+    println!("A Score: {}", answer_a);
 
     let b_result = b(puzzle_data);
     println!("B Score: {}", b_result);
@@ -35,19 +35,21 @@ impl PointSet {
             pointset
                 .entry(p.x)
                 .and_modify(|vec| vec.push(p))
-                .or_insert(vec![p_clone]);
+                .or_insert_with(Vec::new)
+                .push(p_clone);
         }
         PointSet { pointset, max_y }
     }
     pub fn insert(&mut self, point: Point) {
-        if point.y > self.max_y {
-            self.max_y = point.y
-        }
+        // if point.y > self.max_y {
+        //     self.max_y = point.y
+        // }
         let p_clone = point.clone();
         self.pointset
             .entry(point.x)
             .and_modify(|vec| vec.push(point))
-            .or_insert(vec![p_clone]);
+            .or_insert_with(Vec::new)
+            .push(p_clone);
     }
 
     pub fn contains(&self, point: &Point) -> bool {
@@ -55,6 +57,15 @@ impl PointSet {
             self.pointset.get(&point.x).unwrap().contains(point)
         } else {
             false
+        }
+    }
+    pub fn contains_b(&self, point: &Point) -> bool {
+        if point.y == (self.max_y() + 2) {
+            true
+        } else if self.pointset.contains_key(&point.x) {
+            self.pointset.get(&point.x).unwrap().contains(point)
+        } else {
+            point.y == (self.max_y() + 2)
         }
     }
 
@@ -118,6 +129,20 @@ fn find_first_opening_downward(points: &PointSet, x: i32, y: i32) -> (i32, i32) 
         (-1, -1)
     }
 }
+fn find_first_opening_downward_b(points: &PointSet, x: i32, y: i32) -> (i32, i32) {
+    let max_y_points = points.get_points_for_x(x);
+    if let Some(max_y_points) = max_y_points {
+        let max_y = max_y_points.iter().filter(|p| p.y > y).map(|p| p.y).min();
+
+        if let Some(max_y) = max_y {
+            (x, max_y - 1)
+        } else {
+            (x, points.max_y() + 2 - 1)
+        }
+    } else {
+        (x, points.max_y() + 2 - 1)
+    }
+}
 
 fn model_sand(points: &mut PointSet, x: i32, y: i32) -> bool {
     let (newx, newy) = find_first_opening_downward(points, x, y);
@@ -151,25 +176,22 @@ fn model_sand(points: &mut PointSet, x: i32, y: i32) -> bool {
     }
 }
 fn model_sand_b(points: &mut PointSet, x: i32, y: i32) -> bool {
-    let (newx, newy) = find_first_opening_downward(points, x, y);
-    // println!("First opening downward: {},{}", newx, newy);
+    let (newx, newy) = find_first_opening_downward_b(points, x, y);
     if newx == -1 {
+        println!("Equaled -1");
         return false;
     }
-    let (shiftx, shifty) = if !points.contains(&Point {
+    let (shiftx, shifty) = if !points.contains_b(&Point {
         x: newx - 1,
         y: newy + 1,
     }) {
-        // println!("Found space left: {},{}", newx - 1, newy + 1);
         (newx - 1, newy + 1)
-    } else if !points.contains(&Point {
+    } else if !points.contains_b(&Point {
         x: newx + 1,
         y: newy + 1,
     }) {
-        // println!("Found space right: {},{}", newx + 1, newy + 1);
         (newx + 1, newy + 1)
     } else {
-        // println!("Sand settled: {},{}\n", newx, newy);
         (newx, newy)
     };
 
@@ -225,7 +247,7 @@ fn a(path: &str) -> i32 {
 
     let mut placed = true;
     let mut sand_counter = -1;
-    while placed && sand_counter < 5000 {
+    while placed {
         sand_counter += 1;
         placed = model_sand(&mut pointset, 500, 0);
     }
@@ -254,7 +276,7 @@ fn b(path: &str) -> i32 {
     let mut placed = true;
     let mut sand_counter = -1;
     let end_point = Point { x: 500, y: 0 };
-    while placed && !pointset.contains(&end_point) && sand_counter < 50000 {
+    while placed && !pointset.contains(&end_point) {
         sand_counter += 1;
         placed = model_sand_b(&mut pointset, 500, 0);
     }
