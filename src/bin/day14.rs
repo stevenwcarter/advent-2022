@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use advent::read;
 
@@ -19,25 +19,47 @@ fn main() {
 }
 
 struct PointSet {
-    pointset: HashSet<Point>,
+    pointset: HashMap<i32, Vec<Point>>,
+    max_y: i32,
 }
 
 impl PointSet {
     pub fn new(points: Vec<Point>) -> PointSet {
-        PointSet {
-            pointset: HashSet::from_iter(points.iter().cloned()),
+        let mut pointset: HashMap<i32, Vec<Point>> = HashMap::new();
+        let mut max_y = 0;
+        for p in points {
+            if p.y > max_y {
+                max_y = p.y
+            }
+            let p_clone = p.clone();
+            pointset
+                .entry(p.x)
+                .and_modify(|vec| vec.push(p))
+                .or_insert(vec![p_clone]);
         }
+        PointSet { pointset, max_y }
     }
     pub fn insert(&mut self, point: Point) {
-        self.pointset.insert(point);
+        if point.y > self.max_y {
+            self.max_y = point.y
+        }
+        let p_clone = point.clone();
+        self.pointset
+            .entry(point.x)
+            .and_modify(|vec| vec.push(point))
+            .or_insert(vec![p_clone]);
     }
 
     pub fn contains(&self, point: &Point) -> bool {
-        self.pointset.contains(point)
+        if self.pointset.contains_key(&point.x) {
+            self.pointset.get(&point.x).unwrap().contains(point)
+        } else {
+            false
+        }
     }
 
-    pub fn get_points_for_x(&self, x: i32) -> Vec<&Point> {
-        self.pointset.iter().filter(|p| p.x == x).collect()
+    pub fn get_points_for_x(&self, x: i32) -> Option<&Vec<Point>> {
+        self.pointset.get(&x)
     }
 
     #[cfg(test)]
@@ -46,13 +68,13 @@ impl PointSet {
     }
 
     pub fn max_y(&self) -> i32 {
-        self.pointset.iter().map(|p| p.y).max().unwrap()
+        self.max_y
     }
-    pub fn max_x(&self) -> i32 {
-        self.pointset.iter().map(|p| p.x).max().unwrap()
+    pub fn max_x(&self) -> &i32 {
+        self.pointset.keys().into_iter().max().unwrap()
     }
-    pub fn min_x(&self) -> i32 {
-        self.pointset.iter().map(|p| p.x).min().unwrap()
+    pub fn min_x(&self) -> &i32 {
+        self.pointset.keys().into_iter().min().unwrap()
     }
     // pub fn min_y(&self) -> i32 {
     //     self.pointset.iter().map(|p| p.y).min().unwrap()
@@ -83,15 +105,15 @@ fn build_points(p1x: i32, p1y: i32, p2x: i32, p2y: i32) -> Vec<Point> {
 }
 
 fn find_first_opening_downward(points: &PointSet, x: i32, y: i32) -> (i32, i32) {
-    let max_y = points
-        .get_points_for_x(x)
-        .iter()
-        .filter(|p| p.y > y)
-        .map(|p| p.y)
-        .min();
+    let max_y_points = points.get_points_for_x(x);
+    if let Some(max_y_points) = max_y_points {
+        let max_y = max_y_points.iter().filter(|p| p.y > y).map(|p| p.y).min();
 
-    if let Some(max_y) = max_y {
-        (x, max_y - 1)
+        if let Some(max_y) = max_y {
+            (x, max_y - 1)
+        } else {
+            (-1, -1)
+        }
     } else {
         (-1, -1)
     }
